@@ -15,18 +15,22 @@ import { RegisterComponent } from './register/register.component';
 import { MemberListComponent } from './members/member-list/member-list.component';
 import { MemberCardComponent } from './members/member-card/member-card.component';
 import { MemberDetailComponent } from './members/member-detail/member-detail.component';
+import { MemberEditComponent } from './members/member-edit/member-edit.component';
 import { ListsComponent } from './lists/lists.component';
 import { MessagesComponent } from './messages/messages.component';
 
 import { appRoutes } from './routes';
+
+import { AuthGuard } from './_guards/auth.guard';
+import { PreventUnsavedChanges } from './_guards/prevent-unsaved-changes.guard';
 import { AuthService } from './_services/auth.service';
 import { AlertifyService } from './_services/alertify.service';
-import { AuthGuard } from './_guards/auth.guard';
 import { UserService } from './_services/user.service';
 import { ErrorInterceptorProvider } from './_services/error.interceptor';
 
 import { MemberDetailResolver } from './_resolvers/member-detail.resolver';
 import { MemberListResolver } from './_resolvers/member-list.resolver';
+import { MemberEditResolver } from './_resolvers/member-edit.resolver';
 
 export class CustomHammerConfig extends HammerGestureConfig  {
    overrides = {
@@ -45,6 +49,7 @@ export class CustomHammerConfig extends HammerGestureConfig  {
       MemberListComponent,
       MemberCardComponent,
       MemberDetailComponent,
+      MemberEditComponent,
       ListsComponent,
       MessagesComponent
    ],
@@ -69,9 +74,11 @@ export class CustomHammerConfig extends HammerGestureConfig  {
       ErrorInterceptorProvider,
       AlertifyService,
       AuthGuard,
+      PreventUnsavedChanges,
       UserService,
       MemberDetailResolver,
       MemberListResolver,
+      MemberEditResolver,
       { provide: HAMMER_GESTURE_CONFIG, useClass: CustomHammerConfig }
    ],
    bootstrap: [
