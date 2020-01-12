@@ -34,10 +34,14 @@ namespace DatingApp.API
 
         public void ConfigureDevelopmentServices(IServiceCollection services)
         {
+        //    services.AddDbContext<DataContext>(x => {
+        //       x.UseLazyLoadingProxies();
+        //       x.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
+        //    });
            services.AddDbContext<DataContext>(x => {
-              x.UseLazyLoadingProxies();
-              x.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
-           });
+                x.UseLazyLoadingProxies();
+                x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            });
            ConfigureServices(services);
         }
 
