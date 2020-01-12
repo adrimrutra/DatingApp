@@ -32,15 +32,39 @@ namespace DatingApp.API
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureDevelopmentServices(IServiceCollection services)
+        {
+           services.AddDbContext<DataContext>(x => {
+              x.UseLazyLoadingProxies();
+              x.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
+           });
+           ConfigureServices(services);
+        }
+
+        public void ConfigureProductionServices(IServiceCollection services)
+        {
+            services.AddDbContext<DataContext>(x => {
+                x.UseLazyLoadingProxies();
+                x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            });
+            ConfigureServices(services);
+        }
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>(x => x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
-            
             services.AddControllers().AddNewtonsoftJson(opt => {
                 opt.SerializerSettings.ReferenceLoopHandling =
                     Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
+
+            // services.AddDbContext<DataContext>(x => {
+            //     x.UseLazyLoadingProxies();
+            //     x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            // });
+
+            // services.AddDbContext<DataContext>(x => {
+            //     x.UseLazyLoadingProxies();
+            //     x.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
+            // });
 
             services.AddCors();
             services.Configure<CloudinarySettings>(Configuration.GetSection("ClaudinarySettings"));
@@ -85,19 +109,29 @@ namespace DatingApp.API
                         }
                     });
                 });
+
+                app.UseHsts();
             }
 
-            // app.UseHttpsRedirection();
+           // app.UseDeveloperExceptionPage();
+            app.UseHttpsRedirection();
           
             app.UseRouting();
 
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+            // will look for default files or index.html
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapFallbackToController("Index", "Fallback");
+                
             });
         }
     }

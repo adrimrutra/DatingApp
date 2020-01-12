@@ -23,6 +23,8 @@
     "alertifyjs": "^1.13.1",
     "bootstrap": "^4.4.1",
     "bootswatch": "^4.4.1",
+    "browserslist": "^4.8.3",
+    "caniuse-lite": "^1.0.30001019",
     "font-awesome": "^4.7.0",
     "ng2-file-upload": "^1.4.0",
     "ngx-bootstrap": "^5.2.0",
