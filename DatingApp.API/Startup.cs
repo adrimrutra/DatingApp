@@ -20,6 +20,10 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using DatingApp.API.Helpers;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
+using DatingApp.API.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace DatingApp.API
 {
@@ -34,15 +38,21 @@ namespace DatingApp.API
 
         public void ConfigureDevelopmentServices(IServiceCollection services)
         {
-        //    services.AddDbContext<DataContext>(x => {
-        //       x.UseLazyLoadingProxies();
-        //       x.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
-        //    });
-           services.AddDbContext<DataContext>(x => {
+            // services.AddDbContext<DataContext>(x => {
+            //     x.UseLazyLoadingProxies();
+            //     x.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
+            // });
+
+            // services.AddDbContext<DataContext>(x => 
+            // {
+            //     x.UseLazyLoadingProxies();
+            //     x.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
+            // });
+            services.AddDbContext<DataContext>(x => {
                 x.UseLazyLoadingProxies();
                 x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
-           ConfigureServices(services);
+            ConfigureServices(services);
         }
 
         public void ConfigureProductionServices(IServiceCollection services)
@@ -55,21 +65,23 @@ namespace DatingApp.API
         }
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers().AddNewtonsoftJson(opt => {
-                opt.SerializerSettings.ReferenceLoopHandling =
-                    Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            IdentityBuilder builder = services.AddIdentityCore<User>(opt => {
+                opt.Password.RequireDigit = false;
+                opt.Password.RequiredLength = 4;
+                opt.Password.RequireNonAlphanumeric = false;
+                opt.Password.RequireUppercase = false;
             });
 
-            services.AddCors();
-            services.Configure<CloudinarySettings>(Configuration.GetSection("ClaudinarySettings"));
-            services.AddAutoMapper(typeof(DatingRepository).Assembly);
-            services.AddScoped<IAuthRepository, AuthRepository>();
-            services.AddScoped<IDatingRepository, DatingRepository>();
+            builder = new IdentityBuilder(builder.UserType, typeof(Role), builder.Services);
+            builder.AddEntityFrameworkStores<DataContext>();
+            builder.AddRoleValidator<RoleValidator<Role>>();
+            builder.AddRoleManager<RoleManager<Role>>();
+            builder.AddSignInManager<SignInManager<User>>();
 
-            
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options => {
-                    options.TokenValidationParameters =  new TokenValidationParameters
+                .AddJwtBearer(options => 
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII
@@ -78,6 +90,26 @@ namespace DatingApp.API
                         ValidateAudience = false
                     };
                 });
+
+
+
+            services.AddControllers(options => {
+
+                var policy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build();
+
+                options.Filters.Add(new AuthorizeFilter(policy));
+            })
+            .AddNewtonsoftJson(opt => 
+            {
+                opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });
+
+            services.AddCors();
+            services.Configure<CloudinarySettings>(Configuration.GetSection("ClaudinarySettings"));
+            services.AddAutoMapper(typeof(DatingRepository).Assembly);
+            services.AddScoped<IDatingRepository, DatingRepository>();
 
             services.AddScoped<LogUserActivity>();
         }
