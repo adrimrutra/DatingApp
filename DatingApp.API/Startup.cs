@@ -56,16 +56,6 @@ namespace DatingApp.API
                     Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
 
-            // services.AddDbContext<DataContext>(x => {
-            //     x.UseLazyLoadingProxies();
-            //     x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-            // });
-
-            // services.AddDbContext<DataContext>(x => {
-            //     x.UseLazyLoadingProxies();
-            //     x.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
-            // });
-
             services.AddCors();
             services.Configure<CloudinarySettings>(Configuration.GetSection("ClaudinarySettings"));
             services.AddAutoMapper(typeof(DatingRepository).Assembly);
