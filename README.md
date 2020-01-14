@@ -1,4 +1,4 @@
-## Dating Applicatin
+## Dating Application
 
 ### server: C# DotNet Core WebApi / Entity Framework / MsSql server
 ### client: Angular 8 / Bootstrap 4
