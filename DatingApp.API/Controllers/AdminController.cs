@@ -4,7 +4,11 @@ using DatingApp.API.Data;
 using DatingApp.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-
+using CloudinaryDotNet;
+using Microsoft.Extensions.Options;
+using DatingApp.API.Helpers;
+using Microsoft.EntityFrameworkCore;
+using CloudinaryDotNet.Actions;
 
 namespace DatingApp.API.Controllers
 {
@@ -13,9 +17,22 @@ namespace DatingApp.API.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IAdminRepository _repo;
-        public AdminController(IAdminRepository repo)
+        private readonly DataContext _context;
+        private Cloudinary _cloudinary;
+        private readonly IOptions<CloudinarySettings> _cloudinaryConfig;
+        public AdminController(IAdminRepository repo, DataContext context, IOptions<CloudinarySettings> cloudinaryConfig)
         {
             _repo = repo;
+            _context = context;
+            _cloudinaryConfig = cloudinaryConfig;
+
+            Account acc = new Account(
+                _cloudinaryConfig.Value.CloudName,
+                _cloudinaryConfig.Value.ApiKey,
+                _cloudinaryConfig.Value.ApiSecret
+            );
+
+            _cloudinary = new Cloudinary(acc);
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -59,7 +76,7 @@ namespace DatingApp.API.Controllers
         {
             if (await _repo.ApprovePhoto(photoId) == 0)
                 return BadRequest("Could can not approve photo");
-            
+
             return Ok();
         }
 
@@ -67,8 +84,28 @@ namespace DatingApp.API.Controllers
         [HttpPost("rejectPhoto/{photoId}")]
         public async Task<IActionResult> RejectPhoto(int photoId)
         {
-            if (await _repo.RejectPhoto(photoId) == 0)
+            var photo = await _context.Photos
+                        .IgnoreQueryFilters()
+                        .FirstOrDefaultAsync(p => p.Id == photoId);
+
+            if (photo.IsMain)
                 return BadRequest("You can not reject main photo");
+
+            if (photo.PublicId != null)
+            {
+                var deleteParams = new DeletionParams(photo.PublicId);
+
+                var result = _cloudinary.Destroy(deleteParams);
+
+                if (result.Result == "ok")
+                {
+                    await _repo.RejectPhoto(photo);
+                }
+            }
+            if (photo.PublicId == null)
+            {
+                await _repo.RejectPhoto(photo);
+            }
 
             return Ok();
         }
