@@ -31,7 +31,7 @@ constructor(private http: HttpClient) { }
           localStorage.setItem('token', user.token);
           localStorage.setItem('user', JSON.stringify(user.user));
           this.decodedToken = this.jwtHelper.decodeToken(user.token);
-          this.currentUser = user;
+          this.currentUser = user.user;
           this.changeMemberPhoto(this.currentUser.photoUrl);
         }
       })
@@ -45,5 +45,17 @@ constructor(private http: HttpClient) { }
   loggedIn() {
     const token = localStorage.getItem('token');
     return !this.jwtHelper.isTokenExpired(token);
+  }
+
+  roleMatch(allowedRoles): boolean {
+    let isMatch = false;
+    const userRoles = this.decodedToken.role as Array<string>;
+    allowedRoles.forEach(element => {
+      if (userRoles.includes(element)) {
+        isMatch = true;
+        return;
+      }
+    });
+    return isMatch;
   }
 }
