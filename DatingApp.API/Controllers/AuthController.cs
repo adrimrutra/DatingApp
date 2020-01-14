@@ -63,26 +63,33 @@ namespace DatingApp.API.Controllers
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, userForLoginDto.Password, false);
 
+            var userRoles = await _userManager.GetRolesAsync(user);
+
             if (result.Succeeded)
             {
                 var appUser = _mapper.Map<UserForListDto>(user);
 
                 return Ok(new
                 {
-                    token = GenerateJwtToken(user),
+                    token = GenerateJwtToken(user, userRoles),
                     user = appUser
                 });
             }
             
             return Unauthorized();  
         }
-        private string GenerateJwtToken(User user)
+        private string GenerateJwtToken(User user, IList<string> roles)
         {
-            var claims = new[]
+            var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.UserName)
             };
+
+            foreach (var role in roles)
+            {
+               claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetSection("AppSettings:Token").Value));
 

@@ -3,7 +3,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BsDropdownModule, TabsModule, BsDatepickerModule, PaginationModule, ButtonsModule } from 'ngx-bootstrap';
+import { BsDropdownModule, TabsModule, BsDatepickerModule, PaginationModule, ButtonsModule, ModalModule } from 'ngx-bootstrap';
 import { RouterModule } from '@angular/router';
 import { JwtModule } from '@auth0/angular-jwt';
 import { NgxGalleryModule } from 'ngx-gallery';
@@ -23,14 +23,23 @@ import { MemberMessagesComponent } from './members/member-messages/member-messag
 import { PhotoEditorComponent } from './members/photo-editor/photo-editor.component';
 import { ListsComponent } from './lists/lists.component';
 import { MessagesComponent } from './messages/messages.component';
+import { AdminPanelComponent } from './admin/admin-panel/admin-panel.component';
+import { PhotoManagementComponent } from './admin/photo-management/photo-management.component';
+import { UserManagementComponent } from './admin/user-management/user-management.component';
+import { RolesModalComponent } from './admin/roles-modal/roles-modal.component';
+
+
+import { HasRoleDirective } from './_directives/hasRole.directive';
 
 import { appRoutes } from './routes';
 
 import { AuthGuard } from './_guards/auth.guard';
 import { PreventUnsavedChanges } from './_guards/prevent-unsaved-changes.guard';
+
 import { AuthService } from './_services/auth.service';
 import { AlertifyService } from './_services/alertify.service';
 import { UserService } from './_services/user.service';
+import { AdminService } from './_services/admin.service';
 import { ErrorInterceptorProvider } from './_services/error.interceptor';
 
 import { MemberDetailResolver } from './_resolvers/member-detail.resolver';
@@ -38,6 +47,9 @@ import { MemberListResolver } from './_resolvers/member-list.resolver';
 import { MemberEditResolver } from './_resolvers/member-edit.resolver';
 import { ListsResolver } from './_resolvers/lists.resolver';
 import { MessagesResolver } from './_resolvers/messages.resolver';
+
+
+
 
 
 export class CustomHammerConfig extends HammerGestureConfig  {
@@ -65,6 +77,11 @@ export function tokenGet() {
       PhotoEditorComponent,
       ListsComponent,
       MessagesComponent,
+      AdminPanelComponent,
+      HasRoleDirective,
+      PhotoManagementComponent,
+      UserManagementComponent,
+      RolesModalComponent,
       TimeAgoPipe
    ],
    imports: [
@@ -77,6 +94,7 @@ export function tokenGet() {
       BsDatepickerModule.forRoot(),
       PaginationModule.forRoot(),
       ButtonsModule.forRoot(),
+      ModalModule.forRoot(),
       TabsModule.forRoot(),
       RouterModule.forRoot(appRoutes),
       NgxGalleryModule,
@@ -91,17 +109,21 @@ export function tokenGet() {
    ],
    providers: [
       AuthService,
-      ErrorInterceptorProvider,
+      UserService,
+      AdminService,
       AlertifyService,
+      ErrorInterceptorProvider,
       AuthGuard,
       PreventUnsavedChanges,
-      UserService,
       MemberDetailResolver,
       MemberListResolver,
       MemberEditResolver,
       ListsResolver,
       MessagesResolver,
       { provide: HAMMER_GESTURE_CONFIG, useClass: CustomHammerConfig }
+   ],
+   entryComponents: [
+      RolesModalComponent
    ],
    bootstrap: [
       AppComponent
