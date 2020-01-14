@@ -5,7 +5,6 @@ using DatingApp.API.Data;
 using DatingApp.API.Dtos;
 using DatingApp.API.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using AutoMapper;
 using Microsoft.Extensions.Options;
 using DatingApp.API.Helpers;

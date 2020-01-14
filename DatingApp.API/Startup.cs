@@ -118,6 +118,7 @@ namespace DatingApp.API
             services.Configure<CloudinarySettings>(Configuration.GetSection("ClaudinarySettings"));
             services.AddAutoMapper(typeof(DatingRepository).Assembly);
             services.AddScoped<IDatingRepository, DatingRepository>();
+            services.AddScoped<IAdminRepository, AdminRepository>();
 
             services.AddScoped<LogUserActivity>();
         }
