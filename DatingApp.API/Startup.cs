@@ -43,11 +43,10 @@ namespace DatingApp.API
             //     x.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             // });
 
-            // services.AddDbContext<DataContext>(x => 
-            // {
-            //     x.UseLazyLoadingProxies();
-            //     x.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
-            // });
+            services.AddHealthChecks(config => {
+                config.AddSqlServer(Configuration["ConnectionStrings:DefaultConnection"]);
+            });
+
             services.AddDbContext<DataContext>(x => {
                 x.UseLazyLoadingProxies();
                 x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
@@ -57,6 +56,10 @@ namespace DatingApp.API
 
         public void ConfigureProductionServices(IServiceCollection services)
         {
+             services.AddHealthChecks(config => {
+                config.AddSqlServer(Configuration["ConnectionStrings:DefaultConnection"]);
+            });
+
             services.AddDbContext<DataContext>(x => {
                 x.UseLazyLoadingProxies();
                 x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
@@ -164,9 +167,9 @@ namespace DatingApp.API
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHealthChecks("/health");
                 endpoints.MapControllers();
-                endpoints.MapFallbackToController("Index", "Fallback");
-                
+                endpoints.MapFallbackToController("Index", "Fallback");        
             });
         }
     }
