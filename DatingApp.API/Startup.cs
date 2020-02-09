@@ -43,7 +43,9 @@ namespace DatingApp.API
             //     x.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             // });
 
-            services.AddHealthChecks().AddSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            services.AddHealthChecks()
+                .AddSqlServer(Configuration.GetConnectionString("DefaultConnection"))
+                .AddDbContextCheck<DataContext>();
            
 
             services.AddDbContext<DataContext>(x => {
@@ -55,7 +57,9 @@ namespace DatingApp.API
 
         public void ConfigureProductionServices(IServiceCollection services)
         {
-            services.AddHealthChecks().AddSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            services.AddHealthChecks()
+                .AddSqlServer(Configuration.GetConnectionString("DefaultConnection"))
+                .AddDbContextCheck<DataContext>();
 
             services.AddDbContext<DataContext>(x => {
                 x.UseLazyLoadingProxies();
